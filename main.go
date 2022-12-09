@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -15,5 +17,14 @@ func main() {
 
 	fullPath := args[1]
 	dirMap := make(map[string]uint32)
+
+	filepath.WalkDir(fullPath, walk)
+
+}
+
+func walk(path string, dir fs.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
 
 }
