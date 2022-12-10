@@ -3,7 +3,7 @@ A simple CLI application to find large files in a specified directory.
 
 After creating a [similar program using Rust](https://github.com/harr1424/hello_rust) and [C++](https://github.com/harr1424/cpp_filesystem_size), I was curious to learn how to do the same using Go. 
 
-THis program will display up to the ten largest files present in the directory specified as praogram argument. 
+This program will display the ten largest files in the specified directory, as measured in bytes. 
 
 
 
