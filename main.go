@@ -18,15 +18,31 @@ type pair struct {
 	size uint32
 }
 
+const NUM_ENTRIES = 10
+
 func main() {
+	// string representing directory to analyze
+	var fullPath = ""
+
 	args := os.Args
-	if len(args) != 2 {
+	if len(args) > 2 {
 		msg := fmt.Sprintf("Usage: %v <path_to_directory>", args[0])
 		log.Fatal(msg)
+	} else if len(args) == 1 {
+		cwd, err := os.Executable()
+		if err != nil {
+			log.Fatal("Unable to infer current working directory, try providing a path as program argument")
+		}
+		fullPath = filepath.Dir(cwd)
+		log.Println("No path specified, defaulting to current working directory")
+	} else {
+		fullPath = args[1]
 	}
 
-	fullPath := args[1]
+	// create a map to
 	dirMap := make(map[string]uint32)
+
+	fmt.Printf("Searching for %v largest files in %v\n\n", NUM_ENTRIES, fullPath)
 
 	// Recursively visit all filesystem entries at the provided path
 	filepath.WalkDir(fullPath, func(path string, entry fs.DirEntry, err error) error {
@@ -46,13 +62,13 @@ func main() {
 		return pairs[a].size > pairs[b].size
 	})
 
-	// If the provided path had fewer than 10 entries, print all entries and their sizes in bytes
-	if len(pairs) < 10 {
+	// If the provided path had fewer than NUM_ENTRIES, print all entries and their sizes in bytes
+	if len(pairs) < NUM_ENTRIES {
 		for _, file := range pairs {
 			fmt.Printf("%s, %d\n", file.name, file.size)
 		}
-	} else { // print only the largest 10 entries and their sizes in bytes
-		for i := 0; i < 10; i++ {
+	} else { // print only the largest NUM_ENTRIES and their sizes in bytes
+		for i := 0; i < NUM_ENTRIES; i++ {
 			fmt.Printf("%s:  %d\n", pairs[i].name, pairs[i].size)
 		}
 	}
