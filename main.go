@@ -7,18 +7,39 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 /*
-A struct to hold a key value pair corresponding to single member of a
+A struct to hold a key value EntryInfo corresponding to single member of a
 map[string]uint32. This will be sued to sort the map data by value.
 */
-type pair struct {
+type EntryInfo struct {
 	name string
 	size uint32
 }
 
 const NUM_ENTRIES = 10
+
+// Implement a WalkDirFunc that accepts a reference to a slice pf EntryInfo
+func walk(path string, entry fs.DirEntry, err error, pairs *[]EntryInfo) error {
+	if err != nil {
+		return err
+	}
+
+	if !entry.IsDir() {
+		// add entry and it's size to dirMap
+		file, err := os.Stat(path)
+		if err != nil {
+			log.Println("Error determining file size:", err)
+		}
+
+		newPair := EntryInfo{path, uint32(file.Size())}
+		*pairs = append(*pairs, newPair)
+	}
+
+	return nil
+}
 
 func main() {
 	// string representing directory to analyze
@@ -39,28 +60,24 @@ func main() {
 		fullPath = args[1]
 	}
 
-	// create a map to
-	dirMap := make(map[string]uint32)
-
 	fmt.Printf("Searching for %v largest files in %v\n\n", NUM_ENTRIES, fullPath)
+
+	programStart := time.Now()
+
+	// Declare a slice of pairs to hold entry information
+	var pairs []EntryInfo
 
 	// Recursively visit all filesystem entries at the provided path
 	filepath.WalkDir(fullPath, func(path string, entry fs.DirEntry, err error) error {
-		return walk(path, entry, err, dirMap)
+		return walk(path, entry, err, &pairs)
 	})
-
-	// Declare a slice of pairs
-	var pairs []pair
-
-	// Add map entries to pairs slice
-	for k, v := range dirMap {
-		pairs = append(pairs, pair{k, v})
-	}
 
 	// Sort descending
 	sort.Slice(pairs, func(a, b int) bool {
 		return pairs[a].size > pairs[b].size
 	})
+
+	programDuration := time.Since(programStart).Seconds()
 
 	// If the provided path had fewer than NUM_ENTRIES, print all entries and their sizes in bytes
 	if len(pairs) < NUM_ENTRIES {
@@ -73,24 +90,7 @@ func main() {
 		}
 	}
 
+	fmt.Printf("\nProgram completed in %v seconds.\n", programDuration)
 }
 
-// Implement a WalkDirFunc that accepts a reference to a map[string]uint32
-func walk(path string, entry fs.DirEntry, err error, dirMap map[string]uint32) error {
-	if err != nil {
-		return err
-	}
-
-	if !entry.IsDir() {
-		// add entry and it's size to dirMap
-		file, err := os.Stat(path)
-		if err != nil {
-			log.Println("Error determining file size:", err)
-		}
-
-		size := file.Size()
-		dirMap[path] = uint32(size)
-	}
-
-	return nil
-}
+// program completes in 0.26 seconds on average
