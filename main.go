@@ -21,7 +21,7 @@ type EntryInfo struct {
 
 const NUM_ENTRIES = 10
 
-// Implement a WalkDirFunc that accepts a reference to a slice pf EntryInfo
+// Implement a WalkDirFunc that accepts a reference to a slice of EntryInfo
 func walk(path string, entry fs.DirEntry, err error, pairs *[]EntryInfo) error {
 	if err != nil {
 		return err
