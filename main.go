@@ -12,7 +12,7 @@ import (
 
 /*
 A struct to hold a key value EntryInfo corresponding to single member of a
-map[string]uint32. This will be sued to sort the map data by value.
+map[string]uint32. This will be used to sort the map data by value.
 */
 type EntryInfo struct {
 	name string
@@ -28,7 +28,7 @@ func walk(path string, entry fs.DirEntry, err error, pairs *[]EntryInfo) error {
 	}
 
 	if !entry.IsDir() {
-		// add entry and it's size to dirMap
+		// add entry and it's size to EntryInfo slice
 		file, err := os.Stat(path)
 		if err != nil {
 			log.Println("Error determining file size:", err)
